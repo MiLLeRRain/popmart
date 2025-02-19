@@ -1,0 +1,40 @@
+<view class="container">
+  <!-- 上半部分：输入区 -->
+  <view class="grid-container input-grid">
+    <view class="grid-item" wx:for="{{12}}" wx:key="index">
+      <view class="cell-number">{{index + 1}}</view>
+      <picker class="confirmed-number" mode="selector" bindchange="onConfirmedNumberChange" data-index="{{index}}" value="{{confirmedNumbers[index]}}" range="{{numberOptions}}">
+        <view class="picker-content {{confirmedNumbers[index] ? 'confirmed' : ''}}">{{confirmedNumbers[index] || '确定数字'}}</view>
+      </picker>
+      <picker mode="selector" bindchange="onExcludeNumbersChange" data-index="{{index}}" range="{{excludeNumberOptions}}" value="{{[0]}}">
+        <view class="picker-exclude">
+          <text>排除数字 ({{excludeNumbers[index].length}}/3)</text>
+          <view class="selected-numbers">
+            <view class="selected-number" wx:for="{{excludeNumbers[index]}}" wx:key="*this">
+              {{item}}
+            </view>
+          </view>
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 中间部分：按钮区域 -->
+  <view class="button-container">
+    <button class="calculate-btn" bindtap="calculateProbability">计算概率</button>
+    <button class="test-btn" bindtap="onTestData">测试数据</button>
+  </view>
+
+  <!-- 下半部分：结果区 -->
+  <view class="grid-container result-grid" wx:if="{{results.length > 0}}">
+    <view class="grid-item" wx:for="{{results}}" wx:key="index">
+      <view class="cell-number">{{index + 1}}</view>
+      <view class="probability-list">
+        <view class="probability-item" wx:for="{{item.probabilities}}" wx:for-item="prob" wx:key="number">
+          <text class="number">{{prob.number}}</text>
+          <text class="probability">{{prob.value}}%</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

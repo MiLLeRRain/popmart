@@ -1,0 +1,134 @@
+.container {
+  padding: 20rpx;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #f8f8f8;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20rpx;
+  width: 100%;
+  margin-bottom: 30rpx;
+}
+
+.grid-item {
+  background-color: #fff;
+  border-radius: 8rpx;
+  padding: 10rpx;
+  min-height: 180rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.cell-number {
+  font-size: 32rpx;
+  font-family: 'DIN Condensed', -apple-system-font, sans-serif;
+  font-weight: 700;
+  color: #1890ff;
+  text-align: left;
+  background-color: #f0f7ff;
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+  margin-bottom: 8rpx;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.picker-content {
+  padding: 10rpx;
+  background-color: #f9f9f9;
+  border-radius: 4rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.picker-content.confirmed {
+  background-color: #52c41a;
+  color: #fff;
+}
+
+.wx-picker-view-column {
+  text-align: center;
+}
+
+.picker-exclude {
+  position: relative;
+  padding: 10rpx;
+  background-color: #f9f9f9;
+  border-radius: 4rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #666;
+}
+
+.selected-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 10rpx;
+}
+
+.selected-number {
+  background-color: #1890ff;
+  color: #fff;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  font-size: 24rpx;
+}
+
+.button-container {
+  display: flex;
+  gap: 20rpx;
+  margin: 30rpx 0;
+}
+
+.calculate-btn {
+  background-color: #1890ff;
+  color: #fff;
+  border-radius: 8rpx;
+  flex: 1;
+  font-size: 32rpx;
+}
+
+.test-btn {
+  background-color: #52c41a;
+  color: #fff;
+  border-radius: 8rpx;
+  flex: 1;
+  font-size: 32rpx;
+}
+
+.result-grid {
+  margin-top: 30rpx;
+}
+
+.probability-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.probability-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6rpx;
+  background-color: #f9f9f9;
+  border-radius: 4rpx;
+}
+
+.probability-item .number {
+  color: #1890ff;
+  font-weight: bold;
+  font-size: 28rpx;
+}
+
+.probability-item .probability {
+  color: #666;
+  font-size: 24rpx;
+}
