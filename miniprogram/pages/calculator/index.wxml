@@ -1,0 +1,45 @@
+<view class="container">
+  <!-- Series Info -->
+  <view class="series-info" wx:if="{{series}}">
+    <image class="series-image" src="{{series.boxImage}}" mode="aspectFill"></image>
+    <text class="series-name">{{series.name}}</text>
+  </view>
+
+  <!-- Input Grid -->
+  <view class="grid-container input-grid" style="grid-template-columns: repeat({{gridColumns}}, 1fr);">
+    <view class="grid-item" wx:for="{{series.totalBoxes}}" wx:key="index">
+      <view class="cell-number">{{index + 1}}</view>
+      <picker class="confirmed-number" mode="selector" bindchange="onConfirmedNumberChange" data-index="{{index}}" value="{{confirmedNumbers[index]}}" range="{{numberOptions}}">
+        <view class="picker-content {{confirmedNumbers[index] ? 'confirmed' : ''}}">{{confirmedNumbers[index] || '确定数字'}}</view>
+      </picker>
+      <picker mode="selector" bindchange="onExcludeNumbersChange" data-index="{{index}}" range="{{excludeNumberOptions}}" value="{{[0]}}">
+        <view class="picker-exclude">
+          <text>排除数字 ({{excludeNumbers[index].length}}/3)</text>
+          <view class="selected-numbers">
+            <view class="selected-number" wx:for="{{excludeNumbers[index]}}" wx:for-item="excludeNum" wx:key="*this">
+              {{excludeNum}}
+            </view>
+          </view>
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- Calculate Button -->
+  <view class="button-container">
+    <button class="calculate-btn" bindtap="calculateProbability">计算概率</button>
+  </view>
+
+  <!-- Results Grid -->
+  <view class="grid-container result-grid" wx:if="{{results.length > 0}}" style="grid-template-columns: repeat({{gridColumns}}, 1fr);">
+    <view class="grid-item" wx:for="{{results}}" wx:key="box">
+      <view class="cell-number">{{item.box}}</view>
+      <view class="probability-list">
+        <view class="probability-item" wx:for="{{item.probabilities}}" wx:for-item="prob" wx:key="number">
+          <text class="number">{{prob.number}}</text>
+          <text class="probability">{{prob.value}}%</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
