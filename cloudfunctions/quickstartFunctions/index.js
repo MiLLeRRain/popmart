@@ -6,6 +6,8 @@ const updateRecord = require('./updateRecord/index');
 const sumRecord = require('./sumRecord/index');
 const fetchGoodsList = require('./fetchGoodsList/index');
 const genMpQrcode = require('./genMpQrcode/index');
+const fetchSeriesList = require('./fetchSeriesList/index');
+const fetchSeriesItems = require('./fetchSeriesItems/index');
 
 // 云函数入口函数
 exports.main = async (event, context) => {
@@ -26,6 +28,10 @@ exports.main = async (event, context) => {
       return await fetchGoodsList.main(event, context);
     case 'genMpQrcode':
       return await genMpQrcode.main(event, context);
+    case 'fetchSeriesList':
+      return await fetchSeriesList.main(event, context);
+    case 'fetchSeriesItems':
+      return await fetchSeriesItems.main(event, context);
   }
 };
         

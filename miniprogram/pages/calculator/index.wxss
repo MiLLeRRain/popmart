@@ -6,11 +6,11 @@
 }
 
 .series-info {
-  margin-bottom: 30rpx;
+  margin: -20rpx -20rpx 30rpx -20rpx;
   position: relative;
-  border-radius: 12rpx;
   overflow: hidden;
   box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.1);
+  width: 100vw;
 }
 
 .series-image {
@@ -29,6 +29,87 @@
   color: #fff;
   font-size: 32rpx;
   font-weight: bold;
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.item-card {
+  background: #fff;
+  border-radius: 8rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  padding: 10rpx;
+}
+
+.item-image {
+  width: 100%;
+  height: 120rpx;
+  object-fit: contain;
+}
+
+.image-loading,
+.image-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 1;
+}
+
+.loading-spinner {
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid #f3f3f3;
+  border-top: 4rpx solid #1890ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.image-error {
+  background: rgba(245, 245, 245, 0.9);
+}
+
+.image-error text {
+  font-size: 24rpx;
+  color: #ff4d4f;
+}
+
+.series-info,
+.item-card {
+  position: relative;
+}
+
+.item-name {
+  display: block;
+  padding: 8rpx;
+  font-size: 24rpx;
+  color: #333;
+  text-align: center;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
+  line-height: 1.2;
 }
 
 .grid-container {
@@ -103,15 +184,45 @@
 }
 
 .button-container {
+  display: flex;
+  gap: 20rpx;
   margin: 30rpx 0;
+  padding: 0 20rpx;
 }
 
 .calculate-btn {
+  flex: 1;
   background-color: #1890ff;
   color: #fff;
   border-radius: 8rpx;
   font-size: 32rpx;
-  width: 100%;
+}
+
+.reset-btn {
+  flex: 1;
+  background-color: #ff4d4f;
+  color: #fff;
+  border-radius: 8rpx;
+  font-size: 32rpx;
+}
+
+.picker-content.disabled,
+.picker-exclude.disabled {
+  opacity: 0.5;
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.picker-content.disabled::after,
+.picker-exclude.disabled::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.1);
+  pointer-events: none;
 }
 
 .result-grid {

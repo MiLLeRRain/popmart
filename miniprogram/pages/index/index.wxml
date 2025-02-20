@@ -1,12 +1,46 @@
 <view class="container">
+  <!-- Loading Animation -->
+  <view class="loading-container" wx:if="{{!series.length}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
   <!-- 页面标题和说明 -->
   <view class="page-header">
     <text class="page-title">抽盒系列选择</text>
     <text class="page-description">请选择您要计算概率的抽盒系列</text>
   </view>
 
-  <!-- Series List -->
-  <view class="series-list">
-    <!-- Series items will be added here -->
+  <!-- Test Button -->
+  <view class="test-section" wx:if="{{__wxConfig.platform === 'devtools'}}">    <button bindtap="testCloudDB" type="primary">测试云数据库</button>
+  </view>
+
+  <!-- Test Results -->
+  <view class="test-results" wx:if="{{testResults && __wxConfig.platform === 'devtools'}}">    <view class="result-item">系列数量: {{testResults.seriesCount}}</view>    <view class="result-item">商品数量: {{testResults.itemsCount}}</view>    <view class="result-item">图片访问: {{testResults.imageAccessible ? '正常' : '异常'}}</view>
+  </view>
+
+  <!-- Series Grid -->
+  <view class="series-grid">
+    <block>
+      <view 
+        class="series-item" 
+        wx:for="{{series}}" 
+        wx:key="_id" 
+        wx:if="{{item.isActive}}"
+        bindtap="navigateToCalculator" 
+        data-series="{{item}}">
+        <image 
+          class="series-image"
+          src="{{item.seriesImage}}"
+          mode="aspectFill"
+        />
+        <text class="series-name">{{item.name}}</text>
+      </view>
+    </block>
+    <view class="series-item empty-state">
+      <view class="empty-state-content">
+        <text class="empty-state-text">More to come</text>
+      </view>
+    </view>
   </view>
 </view>

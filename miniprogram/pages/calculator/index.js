@@ -10,51 +10,90 @@ Page({
     excludeNumbers: [],
     results: [],
     gridColumns: 4,
-    gridRows: 3
+    gridRows: 3,
+    maxTipsCount: 3,
+    // Add new data properties for image loading states
+    seriesImageLoaded: false,
+    seriesImageError: false,
+    itemImagesLoaded: [],
+    itemImagesError: []
   },
 
-  async onLoad(options) {
-    const { seriesId } = options
-    if (!seriesId) {
-      wx.showToast({
-        title: 'Invalid series ID',
-        icon: 'error'
-      })
-      return
-    }
-
+  async onLoad() {
+    console.log('Calculator Page - onLoad');
     try {
-      // Load series and items data
-      const series = await db.getSeriesById(seriesId)
-      const items = await db.getItemsBySeries(seriesId)
+      const eventChannel = this.getOpenerEventChannel();
+      
+      await new Promise((resolve, reject) => {
+        eventChannel.on('acceptDataFromOpener', (data) => {
+          const { series, items } = data;
+          
+          if (!series || !items) {
+            reject(new Error('Invalid data received'));
+            return;
+          }
 
-      // Calculate grid layout
-      const totalBoxes = series.totalBoxes
-      const { columns, rows } = this.calculateGridLayout(totalBoxes)
+          const totalBoxes = series.totalBoxes;
+          const { columns, rows } = this.calculateGridLayout(totalBoxes);
 
-      // Initialize data arrays
-      const numberOptions = Array.from({length: totalBoxes}, (_, i) => i + 1)
-      const excludeNumberOptions = Array.from({length: totalBoxes}, (_, i) => i + 1)
-      const confirmedNumbers = Array(totalBoxes).fill('')
-      const excludeNumbers = Array(totalBoxes).fill([]).map(() => [])
+          const numberOptions = items.map(item => item.name);
+          const excludeNumberOptions = items.map(item => item.name);
+          const confirmedNumbers = Array(totalBoxes).fill('');
+          const excludeNumbers = Array(totalBoxes).fill([]).map(() => []);
 
-      this.setData({
-        series,
-        items,
-        numberOptions,
-        excludeNumberOptions,
-        confirmedNumbers,
-        excludeNumbers,
-        gridColumns: columns,
-        gridRows: rows
-      })
+          // Initialize image loading states
+          const itemImagesLoaded = Array(items.length).fill(false);
+          const itemImagesError = Array(items.length).fill(false);
+
+          this.setData({
+            series,
+            items,
+            numberOptions,
+            excludeNumberOptions,
+            confirmedNumbers,
+            excludeNumbers,
+            gridColumns: columns,
+            gridRows: rows,
+            maxTipsCount: series.maxTipsCount || 3,
+            itemImagesLoaded,
+            itemImagesError
+          });
+          
+          resolve();
+        });
+      });
     } catch (error) {
-      console.error('Failed to load series data:', error)
+      console.error('Failed to parse page data:', error)
       wx.showToast({
         title: 'Failed to load data',
         icon: 'error'
       })
     }
+  },
+
+  // Image loading handlers
+  onImageLoad() {
+    this.setData({ seriesImageLoaded: true });
+  },
+
+  onImageError() {
+    this.setData({ seriesImageError: true });
+    console.error('Failed to load series image');
+  },
+
+  onItemImageLoad(e) {
+    const { index } = e.currentTarget.dataset;
+    const itemImagesLoaded = [...this.data.itemImagesLoaded];
+    itemImagesLoaded[index] = true;
+    this.setData({ itemImagesLoaded });
+  },
+
+  onItemImageError(e) {
+    const { index } = e.currentTarget.dataset;
+    const itemImagesError = [...this.data.itemImagesError];
+    itemImagesError[index] = true;
+    this.setData({ itemImagesError });
+    console.error(`Failed to load item image at index ${index}`);
   },
 
   calculateGridLayout(totalBoxes) {
@@ -78,25 +117,36 @@ Page({
 
   onConfirmedNumberChange(e) {
     const { index } = e.currentTarget.dataset
-    const value = this.data.numberOptions[e.detail.value]
+    const value = parseInt(e.detail.value) + 1  // Convert picker index to actual number
     const confirmedNumbers = [...this.data.confirmedNumbers]
+    
+    // Clear any existing excluded numbers for this cell
+    const excludeNumbers = [...this.data.excludeNumbers]
+    excludeNumbers[index] = []
+    
     confirmedNumbers[index] = value
-
-    this.setData({ confirmedNumbers })
+    this.setData({ 
+      confirmedNumbers,
+      excludeNumbers
+    })
   },
 
   onExcludeNumbersChange(e) {
     const { index } = e.currentTarget.dataset
-    const selectedValue = this.data.excludeNumberOptions[e.detail.value]
+    const selectedValue = parseInt(e.detail.value) + 1  // Convert picker index to actual number
     const excludeNumbers = [...this.data.excludeNumbers]
+    
+    // Clear any confirmed number for this cell
+    const confirmedNumbers = [...this.data.confirmedNumbers]
+    confirmedNumbers[index] = ''
     
     const currentExcluded = excludeNumbers[index]
     const valueIndex = currentExcluded.indexOf(selectedValue)
     
     if (valueIndex === -1) {
-      if (currentExcluded.length >= 3) {
+      if (currentExcluded.length >= this.data.maxTipsCount) {
         wx.showToast({
-          title: '最多排除3个数字',
+          title: `最多排除${this.data.maxTipsCount}个数字`,
           icon: 'none'
         })
         return
@@ -107,7 +157,35 @@ Page({
     }
     
     excludeNumbers[index] = currentExcluded
-    this.setData({ excludeNumbers })
+    this.setData({ 
+      excludeNumbers,
+      confirmedNumbers
+    })
+  },
+
+  showResetConfirm() {
+    wx.showModal({
+      title: '确认重置',
+      content: '是否确认重置所有选择？',
+      success: (res) => {
+        if (res.confirm) {
+          this.resetAll()
+        }
+      }
+    })
+  },
+
+  resetAll() {
+    const totalBoxes = this.data.series.totalBoxes
+    this.setData({
+      confirmedNumbers: Array(totalBoxes).fill(''),
+      excludeNumbers: Array(totalBoxes).fill([]).map(() => []),
+      results: []
+    })
+    wx.showToast({
+      title: '已重置',
+      icon: 'success'
+    })
   },
 
   calculateProbability() {

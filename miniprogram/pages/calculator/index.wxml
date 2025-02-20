@@ -1,33 +1,76 @@
 <view class="container">
   <!-- Series Info -->
-  <view class="series-info" wx:if="{{series}}">
-    <image class="series-image" src="{{series.boxImage}}" mode="aspectFill"></image>
+  <view class="series-info">
+    <image 
+      class="series-image" 
+      src="{{series.seriesImage}}" 
+      mode="aspectFill"
+      show-menu-by-longpress
+      binderror="onImageError"
+      bindload="onImageLoad"
+    ></image>
     <text class="series-name">{{series.name}}</text>
+    <view class="image-loading" wx:if="{{!seriesImageLoaded}}">
+      <view class="loading-spinner"></view>
+      <text>加载中...</text>
+    </view>
+    <view class="image-error" wx:if="{{seriesImageError}}">
+      <text>图片加载失败</text>
+    </view>
+  </view>
+
+  <!-- Items Grid -->
+  <view class="items-grid">
+    <view class="item-card" wx:for="{{items}}" wx:key="id">
+      <image 
+        class="item-image" 
+        src="{{item.image}}" 
+        mode="aspectFit"
+        show-menu-by-longpress
+        data-index="{{index}}"
+        binderror="onItemImageError"
+        bindload="onItemImageLoad"
+      ></image>
+      <text class="item-name">{{item.name}}</text>
+      <view class="image-loading" wx:if="{{!itemImagesLoaded[index]}}">
+        <view class="loading-spinner"></view>
+      </view>
+      <view class="image-error" wx:if="{{itemImagesError[index]}}">
+        <text>加载失败</text>
+      </view>
+    </view>
   </view>
 
   <!-- Input Grid -->
   <view class="grid-container input-grid" style="grid-template-columns: repeat({{gridColumns}}, 1fr);">
     <view class="grid-item" wx:for="{{series.totalBoxes}}" wx:key="index">
       <view class="cell-number">{{index + 1}}</view>
-      <picker class="confirmed-number" mode="selector" bindchange="onConfirmedNumberChange" data-index="{{index}}" value="{{confirmedNumbers[index]}}" range="{{numberOptions}}">
-        <view class="picker-content {{confirmedNumbers[index] ? 'confirmed' : ''}}">{{confirmedNumbers[index] || '确定数字'}}</view>
-      </picker>
-      <picker mode="selector" bindchange="onExcludeNumbersChange" data-index="{{index}}" range="{{excludeNumberOptions}}" value="{{[0]}}">
-        <view class="picker-exclude">
-          <text>排除数字 ({{excludeNumbers[index].length}}/3)</text>
-          <view class="selected-numbers">
-            <view class="selected-number" wx:for="{{excludeNumbers[index]}}" wx:for-item="excludeNum" wx:key="*this">
-              {{excludeNum}}
+      <block wx:if="{{!excludeNumbers[index].length}}">
+        <picker class="confirmed-number" mode="selector" bindchange="onConfirmedNumberChange" data-index="{{index}}" value="{{confirmedNumbers[index] ? confirmedNumbers[index] - 1 : 0}}" range="{{numberOptions}}">
+          <view class="picker-content {{confirmedNumbers[index] ? 'confirmed' : ''}}">
+            {{confirmedNumbers[index] ? items[confirmedNumbers[index] - 1].name : '确定玩偶'}}
+          </view>
+        </picker>
+      </block>
+      <block wx:if="{{!confirmedNumbers[index]}}">
+        <picker mode="selector" bindchange="onExcludeNumbersChange" data-index="{{index}}" range="{{excludeNumberOptions}}" value="{{[0]}}">
+          <view class="picker-exclude">
+            <text>排除玩偶 ({{excludeNumbers[index].length}}/{{maxTipsCount}})</text>
+            <view class="selected-numbers">
+              <view class="selected-number" wx:for="{{excludeNumbers[index]}}" wx:for-item="excludeNum" wx:key="*this">
+                {{items[excludeNum - 1].name}}
+              </view>
             </view>
           </view>
-        </view>
-      </picker>
+        </picker>
+      </block>
     </view>
   </view>
 
-  <!-- Calculate Button -->
+  <!-- Action Buttons -->
   <view class="button-container">
     <button class="calculate-btn" bindtap="calculateProbability">计算概率</button>
+    <button class="reset-btn" bindtap="showResetConfirm">重置</button>
   </view>
 
   <!-- Results Grid -->
@@ -36,7 +79,7 @@
       <view class="cell-number">{{item.box}}</view>
       <view class="probability-list">
         <view class="probability-item" wx:for="{{item.probabilities}}" wx:for-item="prob" wx:key="number">
-          <text class="number">{{prob.number}}</text>
+          <text class="number">{{items[prob.number - 1].name}}</text>
           <text class="probability">{{prob.value}}%</text>
         </view>
       </view>
