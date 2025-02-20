@@ -1,34 +1,71 @@
 Page({
   data: {
     series: [],
-    testResults: null
+    testResults: null,
+    isLoading: true,
+    loadError: null,
+    retryCount: 0
   },
 
   onLoad() {
-    console.log('Index Page - onLoad');
+    console.log('[Index] Page load started');
     this.loadSeriesData();
   },
 
-  // Load series data
+  // Load series data with retry mechanism
   async loadSeriesData() {
+    const app = getApp();
+    const maxRetries = app.globalData.maxRetries;
+    const timeout = app.globalData.requestTimeout;
+
+    this.setData({ isLoading: true, loadError: null });
+
     try {
-      const seriesRes = await wx.cloud.callFunction({
-        name: 'quickstartFunctions',
-        config: {
-          env: 'popmart-util-8gcbt6lw780e6496'
-        },
-        data: {
-          type: 'fetchSeriesList'
-        }
-      });
+      const seriesRes = await Promise.race([
+        wx.cloud.callFunction({
+          name: 'quickstartFunctions',
+          config: {
+            env: 'popmart-util-8gcbt6lw780e6496'
+          },
+          data: {
+            type: 'fetchSeriesList'
+          }
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('请求超时')), timeout)
+        )
+      ]);
 
       if (seriesRes.result.success && seriesRes.result.data) {
+        console.info('[Index] Series data loaded successfully');
         this.setData({
-          series: seriesRes.result.data
+          series: seriesRes.result.data,
+          isLoading: false,
+          loadError: null,
+          retryCount: 0
         });
+      } else {
+        throw new Error('Invalid response format');
       }
     } catch (error) {
-      console.error('Failed to load series data:', error);
+      console.error('[Index] Failed to load series data:', error);
+      
+      if (this.data.retryCount < maxRetries) {
+        this.setData({ retryCount: this.data.retryCount + 1 });
+        console.info(`[Index] Retrying (${this.data.retryCount}/${maxRetries})...`);
+        setTimeout(() => this.loadSeriesData(), 1000);
+      } else {
+        this.setData({
+          isLoading: false,
+          loadError: error.message || '加载失败'
+        });
+        
+        wx.showToast({
+          title: '数据加载失败，请重试',
+          icon: 'none',
+          duration: 2000
+        });
+      }
     }
   },
 
