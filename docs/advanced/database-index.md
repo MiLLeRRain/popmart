@@ -49,6 +49,20 @@ db.collection('series').where({
   category: 'limited',
   releaseDate: db.command.gte(new Date('2023-01-01'))
 }).get()
+
+// Create compound index for series items sorting
+db.collection('items').createIndex({
+  seriesId: 1,
+  index: 1
+}, {
+  name: 'idx_items_seriesId_index'
+})
+
+// Efficient query using the compound index
+db.collection('items')
+  .where('seriesId', '==', 'series_001')
+  .orderBy('index', 'asc')
+  .get()
 ```
 
 ### Unique Indexes
